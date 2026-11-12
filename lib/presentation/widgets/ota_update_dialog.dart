@@ -29,7 +29,7 @@ class _OtaStartupCheckState extends State<OtaStartupCheck> {
   void initState() {
     super.initState();
     final updates = widget.updates;
-    if (updates != null && updates.isConfigured) {
+    if (updates != null && updates.canCheckForUpdates) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) unawaited(_check(updates));
       });

@@ -37,7 +37,7 @@ class _VersionUpdatesPanelState extends State<VersionUpdatesPanel> {
   Future<void> _check() async {
     if (_checking) return;
     final updates = widget.updates;
-    if (updates == null || !updates.isConfigured) {
+    if (updates == null || !updates.canCheckForUpdates) {
       setState(
         () => _message = 'El canal de actualizaciones no está disponible.',
       );

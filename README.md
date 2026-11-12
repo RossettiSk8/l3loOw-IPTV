@@ -120,25 +120,16 @@ El IPK se genera en `build/webos/<arquitectura>/release/ipk/`. Si los SDK de Flu
 
 ### Actualizaciones internas
 
-Configura `OTA_MANIFEST_URL` en la compilación de distribución. Al abrir l3loOw
-se comprueba el manifiesto en segundo plano y se abre un diálogo si hay una
-versión más reciente. **Ajustes → Versión y
-actualizaciones → Buscar actualizaciones** permite repetir la consulta. La
-versión instalada se muestra aunque el canal de actualizaciones esté sin
-configurar.
+Al abrir l3loOw en Android o LG webOS TV, la app consulta el manifiesto fijo
+en segundo plano y abre un diálogo si hay una versión más reciente.
+**Ajustes → Versión y actualizaciones → Buscar actualizaciones** consulta el
+mismo manifiesto. La URL se define en
+[`AppConstants.otaManifestUrl`](lib/core/dependencies/app_constants.dart).
 
-Para publicar en GitHub, sube los binarios a un release público. Guarda el
-archivo `version.json` en la rama de distribución (por ejemplo, `main`) y copia
-su URL con el botón **Raw**. En el JSON usa las URL de los archivos adjuntos del
-mismo repositorio, con el tag de la versión correspondiente.
-
-```sh
-flutter build apk --release --dart-define=OTA_MANIFEST_URL=https://raw.githubusercontent.com/OWNER/REPO/main/version.json
-```
-
-Si adjuntas también `version.json` al release, usa como alternativa
-`--dart-define=OTA_MANIFEST_URL=https://github.com/OWNER/REPO/releases/latest/download/version.json`.
-Sustituye `OWNER` y `REPO` por los nombres del repositorio público.
+Para publicar, sube primero los binarios a un release público de
+`RossettiSk8/l3loOw-IPTV` y después actualiza `version.json` en la raíz de
+`main`. En el JSON usa las URL de los archivos adjuntos de ese repositorio
+con el tag correspondiente.
 [Archivos adjuntos de GitHub Releases](https://docs.github.com/en/rest/releases/releases)
 
 ```json
@@ -150,13 +141,13 @@ Sustituye `OWNER` y `REPO` por los nombres del repositorio público.
   "android": {
     "version": "1.0.1",
     "build": 2,
-    "url": "https://github.com/OWNER/REPO/releases/download/v1.0.1/l3loOw-1.0.1.apk",
+    "url": "https://github.com/RossettiSk8/l3loOw-IPTV/releases/download/v1.0.1/l3loOw-1.0.1.apk",
     "bytes": 12345678,
     "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
   },
   "webos": {
     "version": "1.0.1",
-    "url": "https://github.com/OWNER/REPO/releases/download/v1.0.1/com.appstreaming.app_1.0.1_all.ipk",
+    "url": "https://github.com/RossettiSk8/l3loOw-IPTV/releases/download/v1.0.1/com.appstreaming.app_1.0.1_all.ipk",
     "bytes": 12345678,
     "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
   }
@@ -169,9 +160,7 @@ La fecha (`publishedAt`), las novedades (`releaseNotes`) y el indicador
 sobrescribirlos por plataforma. Con `mandatory: true`, el diálogo indica que
 la versión es incompatible y bloquea el acceso al catálogo hasta actualizar
 o salir de la aplicación.
-Cada plataforma es opcional en el manifiesto. En un servidor propio, publica
-manifiesto y paquetes en el mismo origen HTTPS y usa URL directas. Las rutas
-relativas se resuelven desde el manifiesto.
+Cada plataforma es opcional en el manifiesto.
 
 - **Android y Android TV.** Publica un APK universal con el mismo identificador
   y firma de la instalación anterior, y un `versionCode` superior que coincida

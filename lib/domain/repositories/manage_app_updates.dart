@@ -4,26 +4,25 @@ import '../entities/ota_update.dart';
 typedef InstalledAppVersion = ({String version, int? build});
 
 final class ManageAppUpdates {
-  const ManageAppUpdates(OtaRepository repository, {this.isConfigured = true})
+  const ManageAppUpdates(OtaRepository repository)
     : _repository = repository,
       _readLocalVersion = null;
 
   const ManageAppUpdates.localOnly(
     Future<InstalledAppVersion> Function() readVersion,
   ) : _repository = null,
-      _readLocalVersion = readVersion,
-      isConfigured = false;
+      _readLocalVersion = readVersion;
 
   final OtaRepository? _repository;
   final Future<InstalledAppVersion> Function()? _readLocalVersion;
-  final bool isConfigured;
+  bool get canCheckForUpdates => _repository != null;
 
   Future<InstalledAppVersion> installedVersion() =>
       _readLocalVersion?.call() ?? _repository!.installedVersion();
 
   Future<OtaUpdate?> check() async {
     final repository = _repository;
-    if (!isConfigured || repository == null) return null;
+    if (repository == null) return null;
     final installed = await installedVersion();
     final release = await repository.latestRelease();
     if (release == null) return null;
@@ -37,7 +36,7 @@ final class ManageAppUpdates {
 
   Stream<OtaProgress> install(OtaUpdate update) {
     final repository = _repository;
-    if (!isConfigured || repository == null) {
+    if (repository == null) {
       return Stream.error(
         StateError('El canal de actualizaciones no está disponible.'),
       );

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:app_streaming/core/dependencies/app_constants.dart';
 import 'package:app_streaming/domain/contracts/playback_preferences_repository.dart';
 import 'package:app_streaming/main.dart';
 import 'package:app_streaming/presentation/widgets/app_settings_provider.dart';
@@ -9,6 +10,8 @@ import 'package:app_streaming/presentation/widgets/tv_action.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
 
@@ -97,7 +100,7 @@ void main() {
     expect(find.text('Inicio'), findsOneWidget);
   });
 
-  testWidgets('Ajustes muestra la versión instalada sin un manifiesto OTA', (
+  testWidgets('Inicio y Ajustes consultan el mismo manifiesto OTA fijo', (
     tester,
   ) async {
     final original = SharedPreferencesAsyncPlatform.instance;
@@ -113,8 +116,21 @@ void main() {
     });
     addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
 
-    await tester.pumpWidget(const AppStreaming());
+    final requests = <Uri>[];
+    final endpoint = Uri.parse(AppConstants.otaManifestUrl);
+    await http.runWithClient(
+      () => tester.pumpWidget(const AppStreaming()),
+      () => MockClient.streaming((request, _) async {
+        requests.add(request.url);
+        return http.StreamedResponse(
+          Stream.value('{"schema":1}'.codeUnits),
+          200,
+        );
+      }),
+    );
     await tester.pumpAndSettle();
+    expect(requests, [endpoint]);
+
     await tester.tap(find.byTooltip('Complementos'));
     await tester.pumpAndSettle();
     final search = find.byWidgetPredicate(
@@ -129,11 +145,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Versión 1.0.0 · Compilación 17'), findsOneWidget);
     await tester.tap(search);
+    await tester.pump();
+    expect(requests, [endpoint, endpoint]);
+    // La lectura del cuerpo HTTP también pasa por el bucle de eventos real.
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
-    expect(
-      find.text('El canal de actualizaciones no está disponible.'),
-      findsOneWidget,
-    );
+    expect(find.text('l3loOw está actualizado.'), findsOneWidget);
   }, variant: const TargetPlatformVariant({TargetPlatform.android}));
 }
 

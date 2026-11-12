@@ -14,10 +14,10 @@ final class OtaUpdaterAdapter implements OtaRepository {
   OtaUpdaterAdapter(
     this._client, {
     required this.platform,
-    this.manifest,
+    required this.manifest,
     this.webOsVersion,
   }) {
-    if (manifest case final uri? when !_isHttps(uri)) {
+    if (!_isHttps(manifest)) {
       throw ArgumentError('El manifiesto OTA debe usar HTTPS.');
     }
   }
@@ -29,8 +29,8 @@ final class OtaUpdaterAdapter implements OtaRepository {
   static final _version = RegExp(r'^\d{1,9}\.\d{1,9}\.\d{1,9}$');
   static final _digest = RegExp(r'^[a-fA-F0-9]{64}$');
 
-  final http.Client? _client;
-  final Uri? manifest;
+  final http.Client _client;
+  final Uri manifest;
   final String? webOsVersion;
   @override
   final OtaPlatform platform;
@@ -76,8 +76,6 @@ final class OtaUpdaterAdapter implements OtaRepository {
 
   @override
   Future<OtaUpdate?> latestRelease() async {
-    final manifest = this.manifest;
-    if (manifest == null) return null;
     final response = await _get(manifest, accept: 'application/json');
     final buffer = BytesBuilder(copy: false);
     await for (final chunk in response.stream.timeout(_networkTimeout)) {
@@ -142,9 +140,7 @@ final class OtaUpdaterAdapter implements OtaRepository {
 
   @override
   Stream<OtaProgress> install(OtaUpdate update) async* {
-    final manifest = this.manifest;
-    if (manifest == null ||
-        platform != OtaPlatform.android ||
+    if (platform != OtaPlatform.android ||
         update.platform != platform ||
         !_isHttps(update.url) ||
         !_allowsArtifact(manifest, update.url) ||
@@ -217,7 +213,7 @@ final class OtaUpdaterAdapter implements OtaRepository {
         request.headers['accept'] = accept;
         request.headers['cache-control'] = 'no-cache';
       }
-      final response = await _client!.send(request).timeout(_networkTimeout);
+      final response = await _client.send(request).timeout(_networkTimeout);
       if (response.statusCode == 200) return response;
       await response.stream.listen(null).cancel();
       final location = response.headers['location'];

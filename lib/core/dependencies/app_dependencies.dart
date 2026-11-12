@@ -28,9 +28,10 @@ import '../../domain/entities/addon_entity.dart';
 import '../../domain/entities/ota_update.dart';
 import '../../domain/repositories/manage_app_updates.dart';
 import '../../domain/repositories/resolve_movie_streams.dart';
-import '../network/http_transport.dart';
-import 'memory_cache_service.dart';
 import '../network/http_connection_pool.dart';
+import '../network/http_transport.dart';
+import 'app_constants.dart';
+import 'memory_cache_service.dart';
 import 'power_management_service.dart';
 
 final class AppDependencies {
@@ -77,18 +78,7 @@ final class AppDependencies {
         OtaPlatform.android,
       _ => null,
     };
-    final manifest = Uri.tryParse(
-      const String.fromEnvironment('OTA_MANIFEST_URL'),
-    );
-    final updateClient =
-        updatePlatform != null &&
-            manifest != null &&
-            manifest.scheme == 'https' &&
-            manifest.host.isNotEmpty &&
-            manifest.userInfo.isEmpty &&
-            !manifest.hasFragment
-        ? http.Client()
-        : null;
+    final updateClient = updatePlatform == null ? null : http.Client();
     final imageCache = MemoryCacheService()..configure();
     final pool = client == null ? HttpConnectionPool(http.Client.new) : null;
     final transport = client == null
@@ -97,11 +87,10 @@ final class AppDependencies {
     final updates = switch (updatePlatform) {
       final platform? => ManageAppUpdates(
         OtaUpdaterAdapter(
-          updateClient,
+          updateClient!,
           platform: platform,
-          manifest: updateClient == null ? null : manifest,
+          manifest: Uri.parse(AppConstants.otaManifestUrl),
         ),
-        isConfigured: updateClient != null,
       ),
       _ when kIsWeb => ManageAppUpdates.localOnly(
         () => OtaUpdaterAdapter.readWebVersion(transport),
