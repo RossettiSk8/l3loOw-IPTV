@@ -1,0 +1,22 @@
+{
+    "id": "com.appstreaming.app",
+    "version": "1.0.0",
+    "vendor": "App Streaming",
+    "type": "native",
+    "main": "app_streaming",
+    "title": "App Streaming",
+    "icon": "icon.png",
+    "iconColor": "#ffffff",
+    "largeIcon": "icon.png",
+    "handlesRelaunch": true,
+    "visible": true,
+    "defaultWindowType": "card",
+    "trustLevel": "default",
+    "locationHint":"none",
+    "noSplashOnLaunch":true,
+    "spinnerOnLaunch": false,
+    "transparent":true,
+    "uiRevision":2,
+    "requiredACG": [
+    ]
+}

@@ -1,0 +1,43 @@
+name: app_streaming
+description: "Base modular de streaming para Android y LG webOS."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  crypto: ^3.0.8
+  http: ^1.6.0
+  shared_preferences: 2.5.4
+  shared_preferences_webos:
+    git:
+      url: https://github.com/lg-flutter-webos/plugins.git
+      path: packages/shared_preferences
+      ref: 3a742bb86b04e261044f0864f9b1f71acf0bbad3
+  video_player: 2.12.0
+  video_player_platform_interface: ^6.3.0
+  video_player_webos:
+    git:
+      url: https://github.com/lg-flutter-webos/plugins.git
+      path: packages/video_player
+      ref: 3a742bb86b04e261044f0864f9b1f71acf0bbad3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  shared_preferences_platform_interface: ^2.4.0
+
+dependency_overrides:
+  video_player_android:
+    path: android/vendor/video_player_android
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/catalog/
+    - webos/meta/appinfo.json
